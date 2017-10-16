@@ -188,4 +188,26 @@ class Channel extends Entity
 
         throw new ChannelActionException($response->body->message);
     }
+
+    /* Retrieves the messages from a channel. */
+    public function history($id, $params = [])
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $extraQuery = http_build_query($params);
+
+        $response = $this->request()->get($this->api_url("channels.history") . "?roomId=$id&$extraQuery")->send();
+
+        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+            return $response->body->messages;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
 }
