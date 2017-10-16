@@ -1,0 +1,23 @@
+{
+    "name": "noisim/rocket-chat",
+    "description": "Rocket Chat REST API client for Laravel.",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Alban Afmeti",
+            "email": "albanafmeti@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "nategood/httpful": "*",
+        "symfony/http-foundation": "~3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Noisim\\RocketChat\\": "src"
+        }
+    }
+}
