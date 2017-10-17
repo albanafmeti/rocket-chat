@@ -63,7 +63,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'activeUsersOnly' => $activeUsersOnly])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -79,7 +79,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -95,7 +95,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -117,7 +117,7 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -137,7 +137,7 @@ class Channel extends Entity
                 'inclusive' => $inclusive,
             ])->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -160,7 +160,7 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -180,7 +180,7 @@ class Channel extends Entity
 
         $response = $this->request()->get($this->api_url("channels.getIntegrations") . "?roomId=$id")->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $response->body->integrations;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
@@ -202,8 +202,352 @@ class Channel extends Entity
 
         $response = $this->request()->get($this->api_url("channels.history") . "?roomId=$id&$extraQuery")->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
             return $response->body->messages;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Retrieves the information about the channel. */
+    public function get($id = null, $paramType = "roomId")
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        if (!in_array($paramType, ["roomId", "roomName"])) {
+            throw new ChannelActionException("Bad method parameter value.");
+        }
+
+        $response = $this->request()->get($this->api_url("channels.info") . "?$paramType=$id")->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            $this->id = $response->body->channel->_id;
+            $this->name = $response->body->channel->name;
+            $this->members = $response->body->channel->usernames;
+            return $this;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Adds a user to the channel. */
+    public function invite($roomId, $userId)
+    {
+        $response = $this->request()->post($this->api_url("channels.invite"))
+            ->body(['roomId' => $roomId, 'userId' => $userId])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Removes a user from the channel. */
+    public function kick($roomId, $userId)
+    {
+        $response = $this->request()->post($this->api_url("channels.kick"))
+            ->body(['roomId' => $roomId, 'userId' => $userId])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Causes the callee to be removed from the channel. */
+    public function leave($id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.leave"))
+            ->body(['roomId' => $id])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Lists all of the channels the calling user has joined. */
+    public function listJoined()
+    {
+        $response = $this->request()->get($this->api_url("channels.list.joined"))->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channels;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Lists all of the channels on the server. */
+    public function all()
+    {
+        $response = $this->request()->get($this->api_url("channels.list"))->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channels;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Adds the channel back to the user’s list of channels. */
+    public function open($id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.open"))
+            ->body(['roomId' => $id])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $this;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Removes the role of moderator from a user in the current channel. */
+    public function removeModerator($roomId, $userId)
+    {
+        $response = $this->request()->post($this->api_url("channels.removeModerator"))
+            ->body(['roomId' => $roomId, 'userId' => $userId])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $this;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Removes the role of owner from a user in the currrent channel. */
+    public function removeOwner($roomId, $userId)
+    {
+        $response = $this->request()->post($this->api_url("channels.removeOwner"))
+            ->body(['roomId' => $roomId, 'userId' => $userId])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $this;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Changes the name of the channel. */
+    public function rename($newName, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.rename"))
+            ->body(['roomId' => $id, 'name' => $newName])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Changes the name of the channel. */
+    public function setDescription($description, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setDescription"))
+            ->body(['roomId' => $id, 'description' => $description])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->description;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Sets the code required to join the channel. */
+    public function setJoinCode($joinCode, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setJoinCode"))
+            ->body(['roomId' => $id, 'joinCode' => $joinCode])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Sets the code required to join the channel. */
+    public function setPurpose($purpose, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setPurpose"))
+            ->body(['roomId' => $id, 'purpose' => $purpose])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->purpose;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Sets whether the channel is read only or not. */
+    public function setReadOnly($readOnly, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setReadOnly"))
+            ->body(['roomId' => $id, 'readOnly' => $readOnly])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+
+    /* Sets the topic for the channel. */
+    public function setTopic($topic, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setTopic"))
+            ->body(['roomId' => $id, 'topic' => $topic])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->topic;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Sets the type of room this channel should be. */
+    public function setType($type, $id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        if (!in_array($type, ["c", "p"])) {
+            throw new ChannelActionException("Bad method parameter value.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.setType"))
+            ->body(['roomId' => $id, 'type' => $type])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $response->body->channel;
+        } else if ($response->code != 200) {
+            throw new ChannelActionException($response->body->error);
+        }
+
+        throw new ChannelActionException($response->body->message);
+    }
+
+    /* Unarchives a channel. */
+    public function unarchive($id = null)
+    {
+        $id = ($id) ? $id : $this->id;
+
+        if (!$id) {
+            throw new ChannelActionException("Room ID not specified.");
+        }
+
+        $response = $this->request()->post($this->api_url("channels.unarchive"))
+            ->body(['roomId' => $id])
+            ->send();
+
+        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
+            return $this;
         } else if ($response->code != 200) {
             throw new ChannelActionException($response->body->error);
         }
