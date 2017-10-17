@@ -57,6 +57,8 @@ class User extends Entity
             $this->id = $response->body->data->userId;
             $this->authToken = $response->body->data->authToken;
             return $this;
+        } else if ($response->code != 200 && isset($response->body->status) && $response->body->status == 'error') {
+            throw new UserActionException($response->body->message);
         } else if ($response->code != 200) {
             throw new UserActionException($response->body->error);
         }
