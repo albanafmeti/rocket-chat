@@ -23,7 +23,7 @@ class RocketChatRequest
         return self::create();
     }
 
-    public static function addHeaders($headers)
+    public static function add_headers($headers)
     {
         foreach ($headers as $header => $value) {
             self::$request->addHeader($header, $value);

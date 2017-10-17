@@ -43,16 +43,11 @@ class Channel extends Entity
             ->body($postData)
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->channel->_id;
-            $this->name = $response->body->channel->name;
-            $this->members = $response->body->channel->usernames;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $channel = $this->handle_response($response, new ChannelActionException(), ['channel']);
+        $this->id = $channel->_id;
+        $this->name = $channel->name;
+        $this->members = $channel->usernames;
+        return $this;
     }
 
     /* Adds all of the users of the Rocket.Chat server to the channel. */
@@ -62,13 +57,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'activeUsersOnly' => $activeUsersOnly])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException());
     }
 
     /* Gives the role of moderator for a user in the current channel. */
@@ -78,13 +67,8 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Gives the role of owner for a user in the currrent channel. */
@@ -94,13 +78,8 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Archives a channel. */
@@ -116,13 +95,8 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Cleans up a channel, removing messages from the provided time range. */
@@ -136,13 +110,8 @@ class Channel extends Entity
                 'inclusive' => $inclusive,
             ])->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Removes the channel from the user’s list of channels. */
@@ -159,13 +128,8 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Retrieves the integrations which the channel has, requires the permission 'manage-integrations' */
@@ -179,13 +143,7 @@ class Channel extends Entity
 
         $response = $this->request()->get($this->api_url("channels.getIntegrations") . "?roomId=$id")->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->integrations;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['integrations']);
     }
 
     /* Retrieves the messages from a channel. */
@@ -201,13 +159,7 @@ class Channel extends Entity
 
         $response = $this->request()->get($this->api_url("channels.history") . "?roomId=$id&$extraQuery")->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->messages;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['messages']);
     }
 
     /* Retrieves the information about the channel. */
@@ -225,16 +177,11 @@ class Channel extends Entity
 
         $response = $this->request()->get($this->api_url("channels.info") . "?$paramType=$id")->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->channel->_id;
-            $this->name = $response->body->channel->name;
-            $this->members = $response->body->channel->usernames;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $channel = $this->handle_response($response, new ChannelActionException(), ['channel']);
+        $this->id = $channel->_id;
+        $this->name = $channel->name;
+        $this->members = $channel->usernames;
+        return $this;
     }
 
     /* Adds a user to the channel. */
@@ -244,13 +191,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Removes a user from the channel. */
@@ -260,13 +201,7 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Causes the callee to be removed from the channel. */
@@ -282,13 +217,7 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Lists all of the channels the calling user has joined. */
@@ -296,13 +225,7 @@ class Channel extends Entity
     {
         $response = $this->request()->get($this->api_url("channels.list.joined"))->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channels;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channels']);
     }
 
     /* Lists all of the channels on the server. */
@@ -310,13 +233,7 @@ class Channel extends Entity
     {
         $response = $this->request()->get($this->api_url("channels.list"))->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channels;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channels']);
     }
 
     /* Adds the channel back to the user’s list of channels. */
@@ -332,13 +249,8 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Removes the role of moderator from a user in the current channel. */
@@ -348,13 +260,8 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Removes the role of owner from a user in the currrent channel. */
@@ -364,13 +271,8 @@ class Channel extends Entity
             ->body(['roomId' => $roomId, 'userId' => $userId])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException());
+        return $this;
     }
 
     /* Changes the name of the channel. */
@@ -386,13 +288,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'name' => $newName])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Changes the name of the channel. */
@@ -408,13 +304,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'description' => $description])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->description;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['description']);
     }
 
     /* Sets the code required to join the channel. */
@@ -430,13 +320,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'joinCode' => $joinCode])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Sets the code required to join the channel. */
@@ -452,13 +336,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'purpose' => $purpose])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->purpose;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['purpose']);
     }
 
     /* Sets whether the channel is read only or not. */
@@ -474,13 +352,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'readOnly' => $readOnly])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
 
@@ -497,13 +369,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'topic' => $topic])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->topic;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['topic']);
     }
 
     /* Sets the type of room this channel should be. */
@@ -523,13 +389,7 @@ class Channel extends Entity
             ->body(['roomId' => $id, 'type' => $type])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->channel;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        return $this->handle_response($response, new ChannelActionException(), ['channel']);
     }
 
     /* Unarchives a channel. */
@@ -545,12 +405,7 @@ class Channel extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ChannelActionException($response->body->error);
-        }
-
-        throw new ChannelActionException($response->body->message);
+        $this->handle_response($response, new ChannelActionException(), ['channel']);
+        return $this;
     }
 }

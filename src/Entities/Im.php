@@ -7,28 +7,11 @@ use Noisim\RocketChat\Exceptions\ImActionException;
 class Im extends Entity
 {
     private $id;
-    private $name;
-    private $members = [];
 
-    private $fillable = ["name", "members"];
-
-    function __construct($im = null, $members = null)
+    function __construct($id = null)
     {
         parent::__construct();
-        $this->create($im, $members);
-    }
-
-    public function create($im = null, $members = null)
-    {
-        if (is_array($im)) {
-            foreach ($im as $field => $value) {
-                $this->{$field} = $value;
-            }
-        } else {
-            $this->name = ($im) ? $im : $this->name;
-            $this->members = ($members) ? $members : $this->members;
-        }
-        return $this;
+        $this->id = $id;
     }
 
     /* Removes the direct message from the user’s list of direct messages. */
@@ -45,13 +28,8 @@ class Im extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        $this->handle_response($response, new ImActionException());
+        return $this;
     }
 
     /* Retrieves the messages from a direct message. */
@@ -67,13 +45,7 @@ class Im extends Entity
 
         $response = $this->request()->get($this->api_url("im.history") . "?roomId=$id&$extraQuery")->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->messages;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        return $this->handle_response($response, new ImActionException(), ['messages']);
     }
 
     /* Lists all of the direct messages in the server, requires the permission 'view-room-administration' permission. */
@@ -81,13 +53,7 @@ class Im extends Entity
     {
         $response = $this->request()->get($this->api_url("im.list.everyone"))->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->ims;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        return $this->handle_response($response, new ImActionException(), ['ims']);
     }
 
     /* Lists all of the direct messages the calling user has joined. */
@@ -95,13 +61,7 @@ class Im extends Entity
     {
         $response = $this->request()->get($this->api_url("im.list"))->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->ims;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        return $this->handle_response($response, new ImActionException(), ['ims']);
     }
 
     /* Retrieves the messages from any direct message in the server.
@@ -117,13 +77,7 @@ class Im extends Entity
 
         $response = $this->request()->get($this->api_url("im.messages.others") . "?roomId=$id")->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->messages;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        return $this->handle_response($response, new ImActionException(), ['messages']);
     }
 
     /* Adds the direct message back to the user’s list of direct messages. */
@@ -139,13 +93,8 @@ class Im extends Entity
             ->body(['roomId' => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $this;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        $this->handle_response($response, new ImActionException());
+        return $this;
     }
 
     /* Sets the topic for the direct message. */
@@ -161,12 +110,6 @@ class Im extends Entity
             ->body(['roomId' => $id, 'topic' => $topic])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->topic;
-        } else if ($response->code != 200) {
-            throw new ImActionException($response->body->error);
-        }
-
-        throw new ImActionException($response->body->message);
+        return $this->handle_response($response, new ImActionException(), ['topic']);
     }
 }

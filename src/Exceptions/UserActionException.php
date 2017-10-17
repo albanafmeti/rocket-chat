@@ -7,7 +7,7 @@ use Exception;
 class UserActionException extends Exception
 {
 
-    public function __construct($message, $code = 0, Exception $previous = null)
+    public function __construct($message = null, $code = 0, Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -15,5 +15,9 @@ class UserActionException extends Exception
     public function __toString()
     {
         return $this->getMessage();
+    }
+
+    public function setMessage($message) {
+        $this->message = $message;
     }
 }

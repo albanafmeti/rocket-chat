@@ -16,4 +16,8 @@ class RocketChatActionException extends Exception
     {
         return $this->getMessage();
     }
+
+    public function setMessage($message) {
+        $this->message = $message;
+    }
 }

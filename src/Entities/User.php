@@ -47,51 +47,36 @@ class User extends Entity
             ->body(['user' => $this->username, 'password' => $this->password])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
-            if ($auth_headers) {
-                $this->add_request_headers([
-                    'X-Auth-Token' => $response->body->data->authToken,
-                    'X-User-Id' => $response->body->data->userId,
-                ]);
-            }
-            $this->id = $response->body->data->userId;
-            $this->authToken = $response->body->data->authToken;
-            return $this;
-        } else if ($response->code != 200 && isset($response->body->status) && $response->body->status == 'error') {
-            throw new UserActionException($response->body->message);
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
+        $data = $this->handle_response($response, new UserActionException(), ["data"]);
+        $this->id = $data->userId;
+        $this->authToken = $data->authToken;
+        if ($auth_headers) {
+            $this->add_request_headers([
+                'X-Auth-Token' => $data->authToken,
+                'X-User-Id' => $data->userId,
+            ]);
         }
-
-        throw new UserActionException($response->body->message);
+        return $this;
     }
 
     public function logout()
     {
         $response = $this->request()->get($this->api_url("logout"))->send();
-
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
-            return true;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException(), ["data", "message"]);
     }
 
     public function me()
     {
         $response = $this->request()->get($this->api_url("me"))->send();
-        if ($response->code == 200) {
-            $this->id = $response->body->_id;
-            $this->name = $response->body->name;
-            $this->email = $response->body->emails[0]->address;
-            $this->emails = $response->body->emails;
-            $this->username = $response->body->username;
-            $this->active = $response->body->active;
-            $this->roles = isset($response->body->roles) ? $response->body->roles : [];
-            return $this;
-        } else if ($response->code != 200 && isset($response->body->status) && $response->body->status == 'error') {
-            throw new UserActionException($response->body->message);
-        }
+        $body = $this->handle_response($response, new UserActionException());
+        $this->id = $body->_id;
+        $this->name = $body->name;
+        $this->email = $body->emails[0]->address;
+        $this->emails = $body->emails;
+        $this->username = $body->username;
+        $this->active = $body->active;
+        $this->roles = isset($body->roles) ? $body->roles : [];
+        return $this;
     }
 
     public function store($user = null, $password = null, $name = null, $email = null)
@@ -105,20 +90,15 @@ class User extends Entity
             ->body($postData)
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->user->_id;
-            $this->name = $response->body->user->name;
-            $this->email = $response->body->user->emails[0]->address;
-            $this->emails = $response->body->user->emails;
-            $this->username = $response->body->user->username;
-            $this->active = $response->body->user->active;
-            $this->roles = $response->body->user->roles;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
-
-        throw new UserActionException($response->body->message);
+        $user = $this->handle_response($response, new UserActionException(), ["user"]);
+        $this->id = $user->_id;
+        $this->name = $user->name;
+        $this->email = $user->emails[0]->address;
+        $this->emails = $user->emails;
+        $this->username = $user->username;
+        $this->active = $user->active;
+        $this->roles = $user->roles;
+        return $this;
     }
 
     public function update($fields = [])
@@ -140,20 +120,15 @@ class User extends Entity
             ->body($postData)
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->user->_id;
-            $this->name = $response->body->user->name;
-            $this->email = $response->body->user->emails[0]->address;
-            $this->emails = $response->body->user->emails;
-            $this->username = $response->body->user->username;
-            $this->active = $response->body->user->active;
-            $this->roles = $response->body->user->roles;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
-
-        throw new UserActionException($response->body->message);
+        $user = $this->handle_response($response, new UserActionException(), ["user"]);
+        $this->id = $user->_id;
+        $this->name = $user->name;
+        $this->email = $user->emails[0]->address;
+        $this->emails = $user->emails;
+        $this->username = $user->username;
+        $this->active = $user->active;
+        $this->roles = $user->roles;
+        return $this;
     }
 
     public function get($id = null, $paramType = "userId")
@@ -169,20 +144,15 @@ class User extends Entity
         }
 
         $response = $this->request()->get($this->api_url("users.info?$paramType=$id"))->send();
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->user->_id;
-            $this->name = $response->body->user->name;
-            $this->email = $response->body->user->emails[0]->address;
-            $this->emails = $response->body->user->emails;
-            $this->username = $response->body->user->username;
-            $this->active = $response->body->user->active;
-            $this->roles = $response->body->user->roles;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        } else {
-            throw new UserActionException($response->body->message);
-        }
+        $user = $this->handle_response($response, new UserActionException(), ["user"]);
+        $this->id = $user->_id;
+        $this->name = $user->name;
+        $this->email = $user->emails[0]->address;
+        $this->emails = $user->emails;
+        $this->username = $user->username;
+        $this->active = $user->active;
+        $this->roles = $user->roles;
+        return $this;
     }
 
     public function delete($id = null)
@@ -196,22 +166,13 @@ class User extends Entity
         $response = $this->request()->post($this->api_url("users.delete"))
             ->body(["userId" => $id])
             ->send();
-
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return true;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException());
     }
 
     public function all()
     {
         $response = $this->request()->get($this->api_url('users.list'))->send();
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body;
-        } else {
-            throw new UserActionException($response->body->message);
-        }
+        return $this->handle_response($response, new UserActionException(), ["users"]);
     }
 
     public function createToken($id = null, $paramType = "userId")
@@ -230,14 +191,7 @@ class User extends Entity
             ->body([$paramType => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->authToken = $response->body->data->authToken;
-            return $response->body->data->authToken;
-        } else if ($response->code != 200 && isset($response->body->status) && $response->body->status == 'error') {
-            throw new UserActionException($response->body->message);
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException(), ["data", "authToken"]);
     }
 
     public function avatar($id = null, $paramType = "userId")
@@ -253,12 +207,7 @@ class User extends Entity
 
         $response = $this->request()->get($this->api_url("users.getAvatar") . "?$paramType=$id")
             ->send();
-
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException());
     }
 
     public function presence($id = null, $paramType = "userId")
@@ -274,12 +223,7 @@ class User extends Entity
 
         $response = $this->request()->get($this->api_url("users.getPresence") . "?$paramType=$id")
             ->send();
-
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->presence;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException(), ["presence"]);
     }
 
     public function register($user = null, $password = null, $name = null, $email = null)
@@ -295,20 +239,16 @@ class User extends Entity
         $response = $this->request()->post($this->api_url("users.register"))
             ->body($postData)
             ->send();
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->user->_id;
-            $this->name = $response->body->user->name;
-            $this->email = $response->body->user->emails[0]->address;
-            $this->emails = $response->body->user->emails;
-            $this->username = $response->body->user->username;
-            $this->active = $response->body->user->active;
-            $this->roles = $response->body->user->roles;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
 
-        throw new UserActionException($response->body->message);
+        $user = $this->handle_response($response, new UserActionException(), ["user"]);
+        $this->id = $user->_id;
+        $this->name = $user->name;
+        $this->email = $user->emails[0]->address;
+        $this->emails = $user->emails;
+        $this->username = $user->username;
+        $this->active = $user->active;
+        $this->roles = $user->roles;
+        return $this;
     }
 
     public function resetAvatar($id = null, $paramType = "userId")
@@ -326,12 +266,7 @@ class User extends Entity
         $response = $this->request()->post($this->api_url("users.resetAvatar"))
             ->body([$paramType => $id])
             ->send();
-
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return true;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException());
     }
 
     public function setAvatar($avatarUrl, $id = null, $paramType = "userId")
@@ -350,11 +285,7 @@ class User extends Entity
             ->body(["avatarUrl" => $avatarUrl, $paramType => $id])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return true;
-        } else if ($response->code != 200) {
-            throw new UserActionException($response->body->error);
-        }
+        return $this->handle_response($response, new UserActionException());
     }
 
     /** Getters and Setters */

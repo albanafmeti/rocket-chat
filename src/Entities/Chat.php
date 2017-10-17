@@ -22,13 +22,7 @@ class Chat extends Entity
             ->body($postData)
             ->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body;
-        } else if ($response->code != 200) {
-            throw new ChatActionException($response->body->error);
-        }
-
-        throw new ChatActionException($response->body->message);
+        return $this->handle_response($response, new ChatActionException());
     }
 
     public function update($roomId, $msgId, $text)
@@ -38,16 +32,9 @@ class Chat extends Entity
                 "roomId" => $roomId,
                 "msgId" => $msgId,
                 "text" => $text
-            ])
-            ->send();
+            ])->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body->message;
-        } else if ($response->code != 200) {
-            throw new ChatActionException($response->body->error);
-        }
-
-        throw new ChatActionException($response->body->message);
+        return $this->handle_response($response, new ChatActionException(), ['message']);
     }
 
     public function delete($roomId, $msgId, $asUser = false)
@@ -57,15 +44,8 @@ class Chat extends Entity
                 "roomId" => $roomId,
                 "msgId" => $msgId,
                 "asUser" => $asUser
-            ])
-            ->send();
+            ])->send();
 
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            return $response->body;
-        } else if ($response->code != 200) {
-            throw new ChatActionException($response->body->error);
-        }
-
-        throw new ChatActionException($response->body->message);
+        return $this->handle_response($response, new ChatActionException());
     }
 }

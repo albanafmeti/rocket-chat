@@ -25,7 +25,7 @@ class Entity
 
     protected function add_request_headers($headers)
     {
-        RocketChatRequest::addHeaders($headers);
+        RocketChatRequest::add_headers($headers);
     }
 
     protected function request()
@@ -51,16 +51,63 @@ class Entity
             ])
             ->send();
 
-        if ($response->code == 200 && isset($response->body->status) && $response->body->status == 'success') {
-            $this->add_request_headers([
-                'X-Auth-Token' => $response->body->data->authToken,
-                'X-User-Id' => $response->body->data->userId,
-            ]);
+        $data = $this->handle_response($response, new UserActionException(), ['data']);
+        $this->add_request_headers([
+            'X-Auth-Token' => $data->authToken,
+            'X-User-Id' => $data->userId,
+        ]);
+        $session->set('RC_X-Auth-Token', $response->body->data->authToken);
+        $session->set('RC_X-User-Id', $response->body->data->userId);
+        return true;
+    }
 
-            $session->set('RC_X-Auth-Token', $response->body->data->authToken);
-            $session->set('RC_X-User-Id', $response->body->data->userId);
-            return true;
+    public function handle_response($response, $exception, $fields = [])
+    {
+        $fields = is_string($fields) ? [$fields] : $fields;
+        try {
+            if ($response->code == 200) {
+
+                if (isset($response->body->success) && $response->body->success == true) {
+                    return $this->data($response->body, $fields);
+                } else if (isset($response->body->status) && $response->body->status == 'success') {
+                    return $this->data($response->body, $fields);
+                } else if (isset($response->body->status) && $response->body->status == 'error') {
+                    $exception->setMessage($response->body->message);
+                } else if (isset($response->body->success) && $response->body->success == false) {
+                    $exception->setMessage($response->body->error);
+                } else {
+                    $exception->setMessage("Something went wrong.");
+                }
+
+            } else {
+                if (isset($response->body->status) && $response->body->status == 'error') {
+                    $exception->setMessage($response->body->message);
+                } else if (isset($response->body->success) && $response->body->success == false) {
+                    $exception->setMessage($response->body->error);
+                } else {
+                    $exception->setMessage("Something went wrong.");
+                }
+            }
+
+        } catch (\Exception $ex) {
+            $exception->setMessage("Something went wrong.");
         }
-        throw new UserActionException($response->body->message);
+        throw $exception;
+    }
+
+    private function data($body, $fields)
+    {
+        if (count($fields) == 1) {
+            return isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
+        } else if (count($fields) == 2) {
+            $stepOne = isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
+            $stepTwo = isset($stepOne->{$fields[1]}) ? $stepOne->{$fields[1]} : $stepOne;
+            return $stepTwo;
+        } else if (count($fields) == 3) {
+            $stepOne = isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
+            $stepTwo = isset($stepOne->{$fields[1]}) ? $stepOne->{$fields[1]} : $stepOne;
+            $stepThree = isset($stepTwo->{$fields[2]}) ? $stepTwo->{$fields[2]} : $stepTwo;
+            return $stepThree;
+        }
     }
 }

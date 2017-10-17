@@ -9,6 +9,7 @@ class Setting extends Entity
     private $id;
     private $value;
 
+    /* Gets the setting for the provided id. */
     public function get($id = null)
     {
         $id = ($id) ? $id : $this->id;
@@ -18,17 +19,14 @@ class Setting extends Entity
         }
 
         $response = $this->request()->get($this->api_url("settings/$id"))->send();
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $response->body->_id;
-            $this->value = $response->body->value;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new SettingActionException($response->body->error);
-        } else {
-            throw new SettingActionException($response->body->message);
-        }
+
+        $body = $this->handle_response($response, new SettingActionException());
+        $this->id = $body->_id;
+        $this->value = $body->value;
+        return $this;
     }
 
+    /* Updates the setting for the provided id. */
     public function update($id = null, $value = null)
     {
         $id = ($id) ? $id : $this->id;
@@ -41,12 +39,10 @@ class Setting extends Entity
         $response = $this->request()->post($this->api_url("settings/$id"))
             ->body(["value" => $value])
             ->send();
-        if ($response->code == 200 && isset($response->body->success) && $response->body->success == true) {
-            $this->id = $id;
-            $this->value = $value;
-            return $this;
-        } else if ($response->code != 200) {
-            throw new SettingActionException("Unable to update the setting.");
-        }
+
+        $this->handle_response($response, new SettingActionException());
+        $this->id = $id;
+        $this->value = $value;
+        return $this;
     }
 }
