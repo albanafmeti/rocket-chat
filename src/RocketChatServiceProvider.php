@@ -27,7 +27,8 @@ class RocketChatServiceProvider extends ServiceProvider
     {
         $this->app->bind("rocket-chat", \Noisim\RocketChat\Entities\RocketChat::class);
         $this->app->bind("chat-user", \Noisim\RocketChat\Entities\User::class);
-        $this->app->bind("chat-channel", \Noisim\RocketChat\Entities\Channel::class);
         $this->app->bind("chat-setting", \Noisim\RocketChat\Entities\Setting::class);
+        $this->app->bind("chat-channel", \Noisim\RocketChat\Entities\Channel::class);
+        $this->app->bind("chat-group", \Noisim\RocketChat\Entities\Group::class);
     }
 }
