@@ -4,10 +4,10 @@ namespace Noisim\RocketChat\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
-class ChatSetting extends Facade
+class Group extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'chat-setting';
+        return 'rc-group';
     }
 }

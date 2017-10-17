@@ -14,7 +14,7 @@ class RocketChatServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/config/config.php' => config_path('rocket_chat.php'),
+            __DIR__ . '/config/rocket_chat.php' => config_path('rocket_chat.php'),
         ], 'config');
     }
 
@@ -26,10 +26,11 @@ class RocketChatServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind("rocket-chat", \Noisim\RocketChat\Entities\RocketChat::class);
-        $this->app->bind("chat-user", \Noisim\RocketChat\Entities\User::class);
-        $this->app->bind("chat-setting", \Noisim\RocketChat\Entities\Setting::class);
-        $this->app->bind("chat-channel", \Noisim\RocketChat\Entities\Channel::class);
-        $this->app->bind("chat-group", \Noisim\RocketChat\Entities\Group::class);
-        $this->app->bind("chat-im", \Noisim\RocketChat\Entities\Im::class);
+        $this->app->bind("rc-user", \Noisim\RocketChat\Entities\User::class);
+        $this->app->bind("rc-setting", \Noisim\RocketChat\Entities\Setting::class);
+        $this->app->bind("rc-channel", \Noisim\RocketChat\Entities\Channel::class);
+        $this->app->bind("rc-group", \Noisim\RocketChat\Entities\Group::class);
+        $this->app->bind("rc-im", \Noisim\RocketChat\Entities\Im::class);
+        $this->app->bind("rc-chat", \Noisim\RocketChat\Entities\Chat::class);
     }
 }
