@@ -35,8 +35,7 @@ class Entity
 
     public function query($symbol = "?")
     {
-        $q = $this->query;
-        return $q ? ($symbol . $q) : null;
+        return $this->query ? ($symbol . $this->query) : null;
     }
 
     protected function add_request_headers($headers)
