@@ -43,7 +43,7 @@ class Im extends Entity
 
         $extraQuery = http_build_query($params);
 
-        $response = $this->request()->get($this->api_url("im.history") . "?roomId=$id&$extraQuery")->send();
+        $response = $this->request()->get($this->api_url("im.history?roomId=$id&$extraQuery", true))->send();
 
         return $this->handle_response($response, new ImActionException(), ['messages']);
     }
@@ -75,7 +75,7 @@ class Im extends Entity
             throw new ImActionException("Im ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("im.messages.others") . "?roomId=$id")->send();
+        $response = $this->request()->get($this->api_url("im.messages.others?roomId=$id", true))->send();
 
         return $this->handle_response($response, new ImActionException(), ['messages']);
     }

@@ -10,6 +10,8 @@ class Entity
 {
     private $api_url;
     private $request;
+    private $extraQuery = [];
+    private $query = "";
 
     function __construct()
     {
@@ -18,9 +20,23 @@ class Entity
         $this->admin_login();
     }
 
-    protected function api_url($path)
+    protected function api_url($path, $hasQuery = false)
     {
-        return rtrim($this->api_url, "/") . "/" . ltrim($path, "/");
+        $path = rtrim($this->api_url, "/") . "/" . ltrim($path, "/");
+        if ($this->query()) {
+            $url = ($hasQuery) ? $path . $this->query("&") : $path . $this->query("?");
+        } else {
+            $url = $path;
+        }
+        $this->extraQuery = [];
+        $this->query = "";
+        return $url;
+    }
+
+    public function query($symbol = "?")
+    {
+        $q = $this->query;
+        return $q ? ($symbol . $q) : null;
     }
 
     protected function add_request_headers($headers)
@@ -109,5 +125,29 @@ class Entity
             $stepThree = isset($stepTwo->{$fields[2]}) ? $stepTwo->{$fields[2]} : $stepTwo;
             return $stepThree;
         }
+    }
+
+    /* To use the next three methods the rest api method need to support the Offset and Count Query Parameters. */
+
+    public function offset($value)
+    {
+        $this->extraQuery["offset"] = $value;
+        $this->query = http_build_query($this->extraQuery);
+        return $this;
+    }
+
+    public function count($value)
+    {
+        $this->extraQuery["count"] = $value;
+        $this->query = http_build_query($this->extraQuery);
+        return $this;
+    }
+
+    public function sort($value)
+    {
+        $value = is_array($value) ? json_encode((object)$value) : $value;
+        $this->extraQuery["sort"] = $value;
+        $this->query = http_build_query($this->extraQuery);
+        return $this;
     }
 }

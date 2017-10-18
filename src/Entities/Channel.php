@@ -141,7 +141,7 @@ class Channel extends Entity
             throw new ChannelActionException("Room ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("channels.getIntegrations") . "?roomId=$id")->send();
+        $response = $this->request()->get($this->api_url("channels.getIntegrations?roomId=$id", true))->send();
 
         return $this->handle_response($response, new ChannelActionException(), ['integrations']);
     }
@@ -157,7 +157,7 @@ class Channel extends Entity
 
         $extraQuery = http_build_query($params);
 
-        $response = $this->request()->get($this->api_url("channels.history") . "?roomId=$id&$extraQuery")->send();
+        $response = $this->request()->get($this->api_url("channels.history?roomId=$id&$extraQuery", true))->send();
 
         return $this->handle_response($response, new ChannelActionException(), ['messages']);
     }
@@ -175,7 +175,7 @@ class Channel extends Entity
             throw new ChannelActionException("Bad method parameter value.");
         }
 
-        $response = $this->request()->get($this->api_url("channels.info") . "?$paramType=$id")->send();
+        $response = $this->request()->get($this->api_url("channels.info?$paramType=$id", true))->send();
 
         $channel = $this->handle_response($response, new ChannelActionException(), ['channel']);
         $this->id = $channel->_id;
