@@ -8,7 +8,7 @@ to your `composer.json` file:
 ```json
 {
     "require": {
-        "noisim/rocket-chat": "1.0.0"
+        "noisim/rocket-chat": "1.0.*"
     }
 }
 ```
