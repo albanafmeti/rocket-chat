@@ -32,5 +32,7 @@ class RocketChatServiceProvider extends ServiceProvider
         $this->app->bind("rc-group", \Noisim\RocketChat\Entities\Group::class);
         $this->app->bind("rc-im", \Noisim\RocketChat\Entities\Im::class);
         $this->app->bind("rc-chat", \Noisim\RocketChat\Entities\Chat::class);
+        $this->app->bind("rc-integration", \Noisim\RocketChat\Entities\Integration::class);
+        $this->app->bind("rc-livechat", \Noisim\RocketChat\Entities\Livechat::class);
     }
 }
