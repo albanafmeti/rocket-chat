@@ -71,8 +71,8 @@ class Entity
             'X-Auth-Token' => $data->authToken,
             'X-User-Id' => $data->userId,
         ]);
-        $session->set('RC_X-Auth-Token', $response->body->data->authToken);
-        $session->set('RC_X-User-Id', $response->body->data->userId);
+        $session->set('RC_X-Auth-Token', $data->authToken);
+        $session->set('RC_X-User-Id', $data->userId);
         return true;
     }
 
