@@ -114,7 +114,7 @@ class Entity
     {
         if (count($fields) == 0) {
             return $body;
-        }  if (count($fields) == 1) {
+        } else if (count($fields) == 1) {
             return isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
         } else if (count($fields) == 2) {
             $stepOne = isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
