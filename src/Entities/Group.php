@@ -142,7 +142,7 @@ class Group extends Entity
             throw new GroupActionException("Room ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("groups.getIntegrations?roomId=$id", true))->send();
+        $response = $this->request()->get($this->api_url("groups.getIntegrations", ["roomId" => $id]))->send();
 
         return $this->handle_response($response, new GroupActionException(), ['integrations']);
     }
@@ -156,9 +156,8 @@ class Group extends Entity
             throw new GroupActionException("Room ID not specified.");
         }
 
-        $extraQuery = http_build_query($params);
-
-        $response = $this->request()->get($this->api_url("groups.history?roomId=$id&$extraQuery", true))->send();
+        $params['roomId'] = $id;
+        $response = $this->request()->get($this->api_url("groups.history", $params))->send();
 
         return $this->handle_response($response, new GroupActionException(), ['messages']);
     }
@@ -176,7 +175,7 @@ class Group extends Entity
             throw new GroupActionException("Bad method parameter value.");
         }
 
-        $response = $this->request()->get($this->api_url("groups.info?$paramType=$id", true))->send();
+        $response = $this->request()->get($this->api_url("groups.info", [$paramType => $id]))->send();
 
         $group = $this->handle_response($response, new GroupActionException(), ['group']);
         $this->id = $group->_id;

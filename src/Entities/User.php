@@ -143,7 +143,7 @@ class User extends Entity
             throw new UserActionException("User ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("users.info?$paramType=$id", true))->send();
+        $response = $this->request()->get($this->api_url("users.info", [$paramType => $id]))->send();
         $user = $this->handle_response($response, new UserActionException(), ["user"]);
         $this->id = $user->_id;
         $this->name = $user->name;
@@ -205,7 +205,7 @@ class User extends Entity
             throw new UserActionException("User ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("users.getAvatar?$paramType=$id", true))
+        $response = $this->request()->get($this->api_url("users.getAvatar", [$paramType => $id]))
             ->send();
         return $this->handle_response($response, new UserActionException());
     }
@@ -221,7 +221,7 @@ class User extends Entity
             throw new UserActionException("User ID not specified.");
         }
 
-        $response = $this->request()->get($this->api_url("users.getPresence?$paramType=$id", true))
+        $response = $this->request()->get($this->api_url("users.getPresence", [$paramType => $id]))
             ->send();
         return $this->handle_response($response, new UserActionException(), ["presence"]);
     }
