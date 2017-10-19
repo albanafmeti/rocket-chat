@@ -112,7 +112,9 @@ class Entity
 
     private function data($body, $fields)
     {
-        if (count($fields) == 1) {
+        if (count($fields) == 0) {
+            return $body;
+        }  if (count($fields) == 1) {
             return isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
         } else if (count($fields) == 2) {
             $stepOne = isset($body->{$fields[0]}) ? $body->{$fields[0]} : $body;
@@ -124,6 +126,7 @@ class Entity
             $stepThree = isset($stepTwo->{$fields[2]}) ? $stepTwo->{$fields[2]} : $stepTwo;
             return $stepThree;
         }
+        return $body;
     }
 
     /* To use the next three methods the rest api method need to support the Offset and Count Query Parameters. */
