@@ -1,4 +1,4 @@
-Rocket-chat is a rest client package for Laravel that you can use to communicate with Rocket.Chat REST API.
+Rocket-chat is a rest client package for Laravel that you can use to consume Rocket.Chat REST API.
 
 ## How to use
 
