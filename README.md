@@ -14,3 +14,14 @@ to your `composer.json` file:
 ```
 
 and run composer to update the dependencies `composer update`.
+
+Then open your Laravel config file config/app.php and in the `$providers` array add the service provider for this package.
+
+```php
+\Noisim\RocketChat\RocketChatServiceProvider::class
+```
+
+Finally generate the configuration file running in the console:
+```
+php artisan vendor:publish --tag=config
+```
