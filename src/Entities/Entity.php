@@ -16,7 +16,7 @@ class Entity
     {
         $this->api_url = config("rocket_chat.instance") . config("rocket_chat.api_root");
         $this->request = RocketChatRequest::singleton();
-        $this->admin_login();
+        $this->main_login();
     }
 
     protected function api_url($path, $queryParams = [])
@@ -24,13 +24,15 @@ class Entity
         $path = rtrim($this->api_url, "/") . "/" . ltrim($path, "/");
         $query = array_merge($queryParams, $this->extraQuery);
 
-        $url = count($query)? $path . "?" . http_build_query($query) : $path;
+        $url = count($query) ? $path . "?" . http_build_query($query) : $path;
         $this->extraQuery = [];
         return $url;
     }
 
     protected function add_request_headers($headers)
     {
+        $session = new Session();
+        $session->set('RC_Headers', $headers);
         RocketChatRequest::add_headers($headers);
     }
 
@@ -39,32 +41,33 @@ class Entity
         return $this->request;
     }
 
-    private function admin_login()
+    private function main_login()
     {
         $session = new Session();
-        if ($session->get('RC_X-Auth-Token') && $session->get('RC_X-User-Id')) {
-            $this->add_request_headers([
-                'X-Auth-Token' => $session->get('RC_X-Auth-Token'),
-                'X-User-Id' => $session->get('RC_X-User-Id'),
-            ]);
+        if ($session->get('RC_Headers')) {
+            $this->add_request_headers($session->get('RC_Headers'));
             return true;
         }
 
-        $response = $this->request()->post($this->api_url("login"))
-            ->body([
-                'user' => config("rocket_chat.admin_username"),
-                'password' => config("rocket_chat.admin_password")
-            ])
-            ->send();
+        if (config("rocket_chat.admin_username") && config("rocket_chat.admin_password")) {
+            $response = $this->request()->post($this->api_url("login"))
+                ->body([
+                    'user' => config("rocket_chat.admin_username"),
+                    'password' => config("rocket_chat.admin_password")
+                ])
+                ->send();
 
-        $data = $this->handle_response($response, new UserActionException(), ['data']);
-        $this->add_request_headers([
-            'X-Auth-Token' => $data->authToken,
-            'X-User-Id' => $data->userId,
-        ]);
-        $session->set('RC_X-Auth-Token', $data->authToken);
-        $session->set('RC_X-User-Id', $data->userId);
-        return true;
+            $data = $this->handle_response($response, new UserActionException(), ['data']);
+
+            $headers = [
+                'X-Auth-Token' => $data->authToken,
+                'X-User-Id' => $data->userId,
+            ];
+            $this->add_request_headers($headers);
+            $session->set('RC_Headers', $headers);
+            return true;
+        }
+        return false;
     }
 
     public function handle_response($response, $exception, $fields = [])
