@@ -3,6 +3,7 @@
 namespace Noisim\RocketChat\Entities;
 
 use Noisim\RocketChat\Exceptions\UserActionException;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class User extends Entity
 {
@@ -62,7 +63,9 @@ class User extends Entity
     public function logout()
     {
         $response = $this->request()->get($this->api_url("logout"))->send();
-        return $this->handle_response($response, new UserActionException(), ["data", "message"]);
+        $message = $this->handle_response($response, new UserActionException(), ["data", "message"]);
+        (new Session())->remove("RC_Headers");
+        return $message;
     }
 
     public function me()
