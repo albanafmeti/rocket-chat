@@ -220,14 +220,6 @@ class Group extends Entity
         return $this->handle_response($response, new GroupActionException(), ['group']);
     }
 
-    /* Lists all of the groups the calling user has joined. */
-    public function listJoined()
-    {
-        $response = $this->request()->get($this->api_url("groups.list.joined"))->send();
-
-        return $this->handle_response($response, new GroupActionException(), ['groups']);
-    }
-
     /* Lists all of the groups on the server. */
     public function all()
     {
