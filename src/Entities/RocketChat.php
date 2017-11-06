@@ -26,7 +26,7 @@ class RocketChat extends Entity
 
         switch ($method) {
             case "GET":
-                return $this->request()->get($this->api_url($path), $body)->send();
+                return $this->request()->get($this->api_url($path, $body))->send();
                 break;
             case "POST":
                 return $this->request()->post($this->api_url($path))
