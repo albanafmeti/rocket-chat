@@ -11,9 +11,11 @@ class Entity
     private $api_url;
     private $request;
     private $extraQuery = [];
+    private $session;
 
     function __construct()
     {
+        $this->session = new Session();
         $this->api_url = config("rocket_chat.instance") . config("rocket_chat.api_root");
         $this->request = RocketChatRequest::singleton();
         $this->main_login();
@@ -31,8 +33,7 @@ class Entity
 
     protected function add_request_headers($headers)
     {
-        $session = new Session();
-        $session->set('RC_Headers', $headers);
+        $this->session->set('RC_Headers', $headers);
         RocketChatRequest::add_headers($headers);
     }
 
@@ -43,8 +44,7 @@ class Entity
 
     private function main_login()
     {
-        $session = new Session();
-        if ($session->get('RC_Headers')) {
+        if ($this->session->get('RC_Headers')) {
             $this->add_request_headers($session->get('RC_Headers'));
             return true;
         }
