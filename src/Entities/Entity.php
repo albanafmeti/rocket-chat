@@ -64,7 +64,6 @@ class Entity
                 'X-User-Id' => $data->userId,
             ];
             $this->add_request_headers($headers);
-            $session->set('RC_Headers', $headers);
             return true;
         }
         return false;
