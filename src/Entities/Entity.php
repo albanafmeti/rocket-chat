@@ -45,7 +45,7 @@ class Entity
     private function main_login()
     {
         if ($this->session->get('RC_Headers')) {
-            $this->add_request_headers($session->get('RC_Headers'));
+            $this->add_request_headers($this->session->get('RC_Headers'));
             return true;
         }
 
