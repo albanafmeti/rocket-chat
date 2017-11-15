@@ -42,7 +42,7 @@ class Entity
         return $this->request;
     }
 
-    private function main_login($useSession = true)
+    public function main_login($useSession = true)
     {
         if ($useSession && $this->session->get('RC_Headers')) {
             $this->add_request_headers($this->session->get('RC_Headers'));
