@@ -177,6 +177,12 @@ class User extends Entity
         $response = $this->request()->get($this->api_url("users.list"))->send();
         return $this->handle_response($response, new UserActionException(), ["users"]);
     }
+    
+    public function getList()
+    {
+        $response = $this->request()->get($this->api_url("users.list"))->send();
+        return $this->handle_response($response, new UserActionException());
+    }
 
     public function createToken($id = null, $paramType = "userId")
     {
