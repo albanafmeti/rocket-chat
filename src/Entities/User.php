@@ -178,9 +178,9 @@ class User extends Entity
         return $this->handle_response($response, new UserActionException(), ["users"]);
     }
     
-    public function getList()
+    public function getList($params = [])
     {
-        $response = $this->request()->get($this->api_url("users.list"))->send();
+        $response = $this->request()->get($this->api_url("users.list", $params))->send();
         return $this->handle_response($response, new UserActionException());
     }
 
