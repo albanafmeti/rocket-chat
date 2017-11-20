@@ -31,10 +31,12 @@ class Entity
         return $url;
     }
 
-    protected function add_request_headers($headers)
+    protected function add_request_headers($headers, $storeInSession = false)
     {
-        $this->session->set('RC_Headers', $headers);
-        RocketChatRequest::add_headers($headers);
+        if($storeInSession) {
+            $this->session->set('RC_Headers', $headers);
+        }
+        return RocketChatRequest::add_headers($headers);
     }
 
     protected function request()
