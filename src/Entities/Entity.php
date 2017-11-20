@@ -65,7 +65,7 @@ class Entity
                 'X-Auth-Token' => $data->authToken,
                 'X-User-Id' => $data->userId,
             ];
-            $this->add_request_headers($headers);
+            $this->add_request_headers($headers, true);
             return true;
         }
         return false;
