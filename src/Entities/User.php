@@ -59,6 +59,12 @@ class User extends Entity
         }
         return $this;
     }
+    
+    public function logout() {
+        if($session->get('RC_Headers')) {
+            $this->session->remove('RC_Headers');
+        }
+    }
 
     public function logout()
     {
