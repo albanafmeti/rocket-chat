@@ -42,7 +42,7 @@ class User extends Entity
         return $this;
     }
 
-    public function login($auth_headers = false)
+    public function login($auth_headers = false, $storeInSession = false)
     {
         $response = $this->request()->post($this->api_url("login"))
             ->body(['user' => $this->username, 'password' => $this->password])
@@ -55,7 +55,7 @@ class User extends Entity
             $this->add_request_headers([
                 'X-Auth-Token' => $data->authToken,
                 'X-User-Id' => $data->userId,
-            ]);
+            ], $storeInSession);
         }
         return $this;
     }
