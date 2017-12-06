@@ -11,7 +11,7 @@ class Entity
     private $api_url;
     private $request;
     private $extraQuery = [];
-    private $session;
+    protected $session;
 
     function __construct()
     {
