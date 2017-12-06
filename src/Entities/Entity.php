@@ -36,7 +36,7 @@ class Entity
         if($storeInSession) {
             $this->session->set('RC_Headers', $headers);
         }
-        return RocketChatRequest::add_headers($headers);
+        RocketChatRequest::add_headers($headers);
     }
 
     protected function request()
