@@ -60,17 +60,11 @@ class User extends Entity
         return $this;
     }
     
-    public function logout() {
-        if($session->get('RC_Headers')) {
-            $this->session->remove('RC_Headers');
-        }
-    }
-
     public function logout()
     {
         $response = $this->request()->get($this->api_url("logout"))->send();
         $message = $this->handle_response($response, new UserActionException(), ["data", "message"]);
-        (new Session())->remove("RC_Headers");
+        $this->session->remove("RC_Headers");
         return $message;
     }
 
