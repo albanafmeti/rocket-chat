@@ -290,7 +290,7 @@ class User extends Entity
             throw new UserActionException("User ID not specified.");
         }
 
-        $response = $this->request()->post($this->api_url("users.resetAvatar"))
+        $response = $this->request()->post($this->api_url("users.setAvatar"))
             ->body(["avatarUrl" => $avatarUrl, $paramType => $id])
             ->send();
 
