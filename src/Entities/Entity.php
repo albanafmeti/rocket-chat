@@ -3,6 +3,7 @@
 namespace Noisim\RocketChat\Entities;
 
 use Exception;
+use Httpful\Request;
 use Noisim\RocketChat\Exceptions\UserActionException;
 use Noisim\RocketChat\Helpers\RocketChatRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -15,7 +16,7 @@ class Entity
     private $api_url;
 
     /**
-     * @var self
+     * @var Request
      */
     private $request;
 
@@ -59,7 +60,7 @@ class Entity
     }
 
     /**
-     * @return Entity|RocketChatRequest
+     * @return Request
      */
     protected function request()
     {
