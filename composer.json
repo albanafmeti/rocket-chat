@@ -14,7 +14,7 @@
     "require": {
         "illuminate/support": "^6.0",
         "nategood/httpful": "*",
-        "symfony/http-foundation": "~4.2"
+        "symfony/http-foundation": "^4.3.4"
     },
     "autoload": {
         "psr-4": {
