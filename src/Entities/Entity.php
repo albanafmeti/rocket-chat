@@ -2,17 +2,37 @@
 
 namespace Noisim\RocketChat\Entities;
 
+use Exception;
+use Httpful\Request;
 use Noisim\RocketChat\Exceptions\UserActionException;
 use Noisim\RocketChat\Helpers\RocketChatRequest;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class Entity
 {
+    /**
+     * @var string
+     */
     private $api_url;
+
+    /**
+     * @var Request
+     */
     private $request;
+
+    /**
+     * @var array
+     */
     private $extraQuery = [];
+
+    /**
+     * @var Session
+     */
     protected $session;
 
+    /**
+     * Entity constructor.
+     */
     function __construct()
     {
         $this->session = new Session();
@@ -33,17 +53,26 @@ class Entity
 
     protected function add_request_headers($headers, $storeInSession = false)
     {
-        if($storeInSession) {
+        if ($storeInSession) {
             $this->session->set('RC_Headers', $headers);
         }
         RocketChatRequest::add_headers($headers);
     }
 
+    /**
+     * @return Request
+     */
     protected function request()
     {
         return $this->request;
     }
 
+    /**
+     * @param bool $useSession
+     *
+     * @return bool
+     * @throws Exception
+     */
     public function main_login($useSession = true)
     {
         if ($useSession && $this->session->get('RC_Headers')) {
@@ -54,8 +83,8 @@ class Entity
         if (config("rocket_chat.admin_username") && config("rocket_chat.admin_password")) {
             $response = $this->request()->post($this->api_url("login"))
                 ->body([
-                    'user' => config("rocket_chat.admin_username"),
-                    'password' => config("rocket_chat.admin_password")
+                    'user'     => config("rocket_chat.admin_username"),
+                    'password' => config("rocket_chat.admin_password"),
                 ])
                 ->send();
 
@@ -63,7 +92,7 @@ class Entity
 
             $headers = [
                 'X-Auth-Token' => $data->authToken,
-                'X-User-Id' => $data->userId,
+                'X-User-Id'    => $data->userId,
             ];
             $this->add_request_headers($headers, true);
             return true;
@@ -71,6 +100,14 @@ class Entity
         return false;
     }
 
+    /**
+     * @param           $response
+     * @param Exception $exception
+     * @param array     $fields
+     *
+     * @return mixed
+     * @throws Exception
+     */
     public function handle_response($response, $exception, $fields = [])
     {
         $fields = is_string($fields) ? [$fields] : $fields;
@@ -99,12 +136,18 @@ class Entity
                 }
             }
 
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $exception->setMessage("Something went wrong.");
         }
         throw $exception;
     }
 
+    /**
+     * @param $body
+     * @param $fields
+     *
+     * @return mixed
+     */
     private function data($body, $fields)
     {
         if (count($fields) == 0) {
@@ -124,23 +167,37 @@ class Entity
         return $body;
     }
 
-    /* To use the next three methods the rest api method need to support the Offset and Count Query Parameters. */
-
+    /**
+     * To use the next three methods the rest api method need to support the Offset and Count Query Parameters.
+     * @param $value
+     *
+     * @return $this
+     */
     public function skip($value)
     {
         $this->extraQuery["offset"] = $value;
         return $this;
     }
 
+    /**
+     * @param $value
+     *
+     * @return $this
+     */
     public function take($value)
     {
         $this->extraQuery["count"] = $value;
         return $this;
     }
 
+    /**
+     * @param $value
+     *
+     * @return $this
+     */
     public function sort($value)
     {
-        $value = is_array($value) ? json_encode((object)$value) : $value;
+        $value = is_array($value) ? json_encode((object) $value) : $value;
         $this->extraQuery["sort"] = $value;
         return $this;
     }
